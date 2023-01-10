@@ -1,0 +1,101 @@
+---
+title: "ScriptOverview"
+author: "Charlie Walker"
+date: "2023-01-10"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The goal of this assignment is to become comfortable using GitHub as a public repository for our coding work. 
+
+[[Here is the link to said GitHub repository]](https://github.com/moonflwrz/BIOL432_Assignment1){.uri}
+
+As always, let's start with our data setup and selection, before moving on to some simple graphing work. 
+
+```{r data_setup}
+
+#loading libraries & importing dataset.. 
+library(dplyr)
+library(ggplot2)
+
+measurDat<-read.csv("measurementsV2.csv")
+
+#avg. limb vol.. 
+limbvol_tab<-measurDat %>% 
+  group_by(Organism, limb_vol) %>% 
+  aggregate(limb_vol~Organism, FUN="mean")
+print(limbvol_tab)
+
+#organism~observer combos.. 
+obser_tab<-measurDat %>% 
+  group_by(Organism, Observer) %>% 
+  count(Organism, Observer)
+print(obser_tab)
+
+```
+
+Time to visualize our data.
+Let's start with volume first..  
+
+```{r boxplot, fig.cap="The figure above displays the range in average limb volume between the five organisms of study, coded by color for better clarity."}
+
+#colorblind-safe 5-valu palette from
+palette<-c("#648FFF", "#785EF0",
+           "#DC267F", "#FE6100", "#FFB000")
+
+measurDat %>% 
+  ggplot(aes(x=Organism), y=limb_vol) +
+  geom_bar(aes(fill=Organism)) +
+  scale_fill_manual(values=palette) +
+  ylab("Avg. Limb Volume") +
+  scale_x_discrete(guide=
+                     guide_axis(n.dodge=3))
+  
+```
+
+..and now, let's plot all of the measurements together.
+
+```{r multiplot, fig.cap="The figure aboves displays the range of the three limb measurements (length, width, and volume) for the five studied organisms. Previous color-coding remains, refer to legend."}
+
+plotA<-measurDat %>% 
+  ggplot(aes(x=Organism), y=limb_vol) +
+  geom_bar(aes(fill=Organism)) +
+  scale_fill_manual(values=palette) +
+  ylab("Avg. Limb Volume") +
+  theme(axis.text.x=element_text(size=4),
+        axis.title.x=element_blank(), 
+        legend.text=element_text(size=10)) +
+  scale_x_discrete(guide=
+                     guide_axis(n.dodge=3))
+
+plotB<-measurDat %>% 
+  ggplot(aes(x=Organism), y=limb_width) +
+  geom_bar(aes(fill=Organism)) +
+  scale_fill_manual(values=palette) +
+  ylab("Avg. Limb Width") +
+  theme(axis.text.x=element_text(size=4),
+        axis.title.x=element_blank(), 
+        legend.text=element_text(size=10)) +
+  scale_x_discrete(guide=
+                     guide_axis(n.dodge=3))
+
+plotC<-measurDat %>% 
+  ggplot(aes(x=Organism), y=limb_length) +
+  geom_bar(aes(fill=Organism)) +
+  scale_fill_manual(values=palette) +
+  ylab("Avg. Limb Length") +
+  theme(axis.text.x=element_text(size=4),
+        axis.title.x=element_blank(), 
+        legend.text=element_text(size=10)) +
+  scale_x_discrete(guide=
+                     guide_axis(n.dodge=3))
+
+ggpubr::ggarrange(plotA, plotB, plotC,
+                  ncol=3,
+                  common.legend=T,
+                  legend="right")
+
+```
