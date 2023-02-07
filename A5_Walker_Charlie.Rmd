@@ -1,0 +1,41 @@
+---
+title: "Regex"
+author: "Charlie Walker"
+date: "2023-02-07"
+output: pdf_document
+---
+
+[Github Respository Link](https://github.com/moonflwrz/BIOL432_Assignment1)
+
+```{r main_chunk}
+#loading libraries
+library(dplyr)
+library(stringi) #easy multi-renaming using regex
+
+#loading dataset from Assignment 1
+MData<-read.csv("measurements.csv")
+
+#New 'Sp' column 
+SpData<-MData %>% 
+  mutate(Sp=Organism) %>% 
+  relocate(Sp, .after=Organism)
+  
+#Shortening scientific names in 'Sp' using stringi
+#streamlined method using gsub syntax 
+SpData$Sp<-stri_replace_all_regex(
+  SpData$Sp,
+  pattern=c('Hydrodamalis', 'Equus',
+            'Thylacinus','Ectopistes',
+            'Raphus'),
+  replacement=c('H.', 'E.', 'T.', 'E.', 'R.'),
+  vectorize=F)
+
+#Excluding 'Organism'
+MeasShort<-SpData %>% 
+  select(!c(Organism))
+
+#Writing new .csv file
+write.csv(MeasShort, "MeasShort.csv")
+
+```
+
